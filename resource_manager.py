@@ -21,6 +21,7 @@ def cloud():
 
 
 
+
 @app.route('/cloud/nodes/<name>', defaults={'pod_name': 'default'})
 @app.route('/cloud/nodes/<name>/<pod_name>')
 def cloud_register(name, pod_name):
@@ -50,6 +51,9 @@ def cloud_register(name, pod_name):
 
 
 
+
+
+
 @app.route('/cloud/rmnodes/<name>')
 def cloud_rm_node(name):
     if request.method == 'GET':
@@ -72,6 +76,10 @@ def cloud_rm_node(name):
 
 
 
+
+
+
+
 @app.route('/cloud/jobs/launch', methods=['POST'])
 def cloud_launch():
     if request.method == 'POST':
@@ -84,12 +92,26 @@ def cloud_launch():
 
 
 
+
+
 @app.route('/cloud/podls/')
 def cloud_pod_ls():
     print(pods_dict)
     result = 'success'
     return jsonify ({'result': result})
 
+@app.route('/cloud/init/')
+def cloud_init():
+    cURL.setopt(cURL.URL, proxy_url + '/cloudproxy/init/')
+    cURL.perform()
+    result = 'success'
+    return jsonify ({'result': result})
+
+
+
+
+
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5100)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
