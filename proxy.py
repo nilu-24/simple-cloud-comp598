@@ -1,9 +1,12 @@
 from flask import Flask, jsonify, request
+import docker
+import os
 
 app = Flask(__name__)
 
 nodes = []
 jobs = []
+
 
 
 @app.route('/cloudproxy/nodes/<name>')
@@ -26,7 +29,7 @@ def cloud_register(name):
         return jsonify({'result': result, 'node_status': node_status, 'node_name':name})
 
 @app.route('/cloudproxy/rmnodes/<name>')
-def clour_rm_node(name):
+def cloud_rm_node(name):
     if request.method == 'GET':
         print('Request to remove node: ' + str(name))
         result = 'unknown'
@@ -44,6 +47,14 @@ def clour_rm_node(name):
 
         return jsonify({'result': result, 'node_status': node_status, 'node_name':name})
 
+@app.route('/cloudproxy/init/')
+def cloud_init():
+
+    result = 'successful init'
+    return jsonify({'result': result})
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=6000)
+
+
