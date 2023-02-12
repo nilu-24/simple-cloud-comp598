@@ -19,8 +19,6 @@ def cloud_init(url):
     cURL.perform()
 
 
-    
-
 def cloud_register(url, command):
     if init_check:
         command_list = command.split()
@@ -33,17 +31,12 @@ def cloud_register(url, command):
   
 
 
-
-
 def cloud_rm_node(url, command):
     if init_check:
         command_list = command.split()
         if len(command_list) == 3:
             cURL.setopt(cURL.URL, url + '/cloud/rmnodes/' + command_list[2])
             cURL.perform()
-
-
-
 
 
 

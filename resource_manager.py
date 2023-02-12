@@ -3,8 +3,28 @@ import pycurl
 import json
 from io import BytesIO
 
+
+
+
+#creating classes for Node
+class Node:
+    '''
+Each node will have a specific CPU, memory, and storage limit factor.
+You need to make these factors as configurable parameters in the simple cloud implementation so we can configure the type of nodes – thin, medium, large nodes.
+    '''
+
+    def __init__(self, name, container=None,id=None, status="Idle", log=None, curr_job=None, cpu=None, limit=None, memory=None):
+        self.id = id
+        self.name = name
+        self.status = status
+        self.log = log
+        self.curr_job = curr_job
+        self.container = container
+
+
+
 cURL = pycurl.Curl()
-proxy_url = 'http://10.140.17.112:6000'
+proxy_url = 'http://10.0.0.207:6000/'
 
 app = Flask(__name__)
 
@@ -21,9 +41,9 @@ def cloud():
 
 
 
-
 @app.route('/cloud/nodes/<name>', defaults={'pod_name': 'default'})
 @app.route('/cloud/nodes/<name>/<pod_name>')
+
 def cloud_register(name, pod_name):
     if request.method == 'GET':
         print('Request to register node: ' + str(name) + ' on pod: ' + str(pod_name))
@@ -50,10 +70,6 @@ def cloud_register(name, pod_name):
         return jsonify({'result': result, 'node_status': node_status, 'new_node_name':str(name), 'new_node_pod': new_node_pod})
 
 
-
-
-
-
 @app.route('/cloud/rmnodes/<name>')
 def cloud_rm_node(name):
     if request.method == 'GET':
@@ -77,9 +93,6 @@ def cloud_rm_node(name):
 
 
 
-
-
-
 @app.route('/cloud/jobs/launch', methods=['POST'])
 def cloud_launch():
     if request.method == 'POST':
@@ -89,9 +102,6 @@ def cloud_launch():
         #TODO:logic for invoking RM-Proxy
         result = 'success'
         return jsonify ({'result': result})
-
-
-
 
 
 @app.route('/cloud/podls/')
@@ -113,5 +123,5 @@ def cloud_init():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5100)
 
