@@ -3,9 +3,6 @@ import pycurl
 import json
 from io import BytesIO
 
-
-
-
 #creating classes for Node
 class Node:
     '''

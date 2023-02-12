@@ -64,8 +64,14 @@ def cloud_rm_node(name):
 @app.route('/cloudproxy/init/')
 def cloud_init():
 
-    result = 'successful init'
-    return jsonify({'result': result})
+    #initializing 50 nodes
+    for i in range(50):
+        n = Node(name=f"node{i+1}", status="Idle")
+        nodes.append(n)
+
+    result = 'successful initialized idle 50 nodes'
+    node_list = [node.name for node in nodes]
+    return jsonify({'result': result, "node_list": node_list})
 
 
 if __name__ == '__main__':
