@@ -3,6 +3,15 @@ import pycurl
 import json
 from io import BytesIO
 
+class Cluster:
+    def __init__(self, cluster_name):
+        self.cluster_name = cluster_name
+        self.pods = []
+class Pod:
+    def __init__(self, pod_name):
+        self.pod_name = pod_name
+        self.nodes = []
+
 #creating classes for Node
 class Node:
     '''
@@ -10,13 +19,29 @@ Each node will have a specific CPU, memory, and storage limit factor.
 You need to make these factors as configurable parameters in the simple cloud implementation so we can configure the type of nodes – thin, medium, large nodes.
     '''
 
-    def __init__(self, name, container=None,id=None, status="Idle", log=None, curr_job=None, cpu=None, limit=None, memory=None):
+    def __init__(self, name, job_status=None, container=None,id=None, container_status="Idle", log=None, curr_job=None, cpu=None, limit=None, memory=None):
         self.id = id
         self.name = name
-        self.status = status
+        self.container_status = container_status
+        self.job_status = job_status
         self.log = log
         self.curr_job = curr_job
+        #list of all jobs / logs (also need id or name of job for searching)
         self.container = container
+
+
+        # idle
+        #start job
+        # running
+        #as soon as job done reset to idle
+
+
+
+
+        # def check_if_ended():
+        #     if self.container.exec_inspect not None:
+        #         self.status = "Job done"
+            
 
 
 

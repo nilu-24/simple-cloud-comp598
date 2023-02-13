@@ -1,15 +1,15 @@
 from flask import Flask, jsonify, request
-import docker
-import os
 from resource_manager import Node
+import docker
+
+client = docker.from_env()
 
 
 app = Flask(__name__)
 
 
 nodes = []
-jobs = []
-
+jobs = [] #queue
 
 
 @app.route('/cloudproxy/nodes/<name>')
@@ -66,7 +66,8 @@ def cloud_init():
 
     #initializing 50 nodes
     for i in range(50):
-        n = Node(name=f"node{i+1}", status="Idle")
+        c = client.containers.run('alpine','ash',detach=True,tty=True, name = f"node{i+1}")
+        n = Node(name=f"node{i+1}", status="Idle", container=c)
         nodes.append(n)
 
     result = 'successful initialized idle 50 nodes'
