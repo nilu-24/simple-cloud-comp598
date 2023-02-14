@@ -58,6 +58,11 @@ def cloud_pod_ls(url, command):
             cURL.setopt(cURL.URL, url + '/cloud/podls/')
             cURL.perform()
 
+def cloud_node_ls(url):
+    if init_check:
+        cURL.setopt(cURL.URL, url + '/cloud/nodels/')
+        cURL.perform()
+
 
 def main():
     rm_url = sys.argv[1]
@@ -75,6 +80,9 @@ def main():
             cloud_pod_ls(rm_url, command)
         elif command.startswith('cloud init'):
             cloud_init(rm_url)
+
+        elif command.startswith('cloud node ls'):
+            cloud_node_ls(rm_url)
 
 if __name__ == '__main__':
     main()

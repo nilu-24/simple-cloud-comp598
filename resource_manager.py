@@ -19,14 +19,13 @@ Each node will have a specific CPU, memory, and storage limit factor.
 You need to make these factors as configurable parameters in the simple cloud implementation so we can configure the type of nodes – thin, medium, large nodes.
     '''
 
-    def __init__(self, name, job_status=None, container=None,id=None, container_status="Idle", log=None, curr_job=None, cpu=None, limit=None, memory=None):
+    def __init__(self, name, job_status=None, container=None,id=None, container_status="Idle", curr_job=None, cpu=None, limit=None, memory=None):
         self.id = id
         self.name = name
         self.container_status = container_status
         self.job_status = job_status
-        self.log = log
+        self.logs = []
         self.curr_job = curr_job
-        #list of all jobs / logs (also need id or name of job for searching)
         self.container = container
 
 
@@ -36,13 +35,10 @@ You need to make these factors as configurable parameters in the simple cloud im
         #as soon as job done reset to idle
 
 
-
-
         # def check_if_ended():
         #     if self.container.exec_inspect not None:
         #         self.status = "Job done"
             
-
 
 
 cURL = pycurl.Curl()
@@ -141,7 +137,22 @@ def cloud_init():
 
 
 
+@app.route('/cloud/nodels/')
+def cloud_node_ls(): 
+    #return the nodes array from proxy
+    data = BytesIO()
 
+    cURL.setopt(cURL.URL, proxy_url + '/cloudproxy/nodels/')
+    cURL.setopt(cURL.WRITEFUNCTION, data.write)
+    cURL.perform()
+    dictionary = json.loads(data.getvalue())
+    print(dictionary)
+
+    result = "success"
+    all_nodes = dictionary['all_nodes']
+
+    return jsonify({'result': result, 'all_nodes': all_nodes})
+        
 
 
 if __name__ == '__main__':
