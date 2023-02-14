@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Dashboard</title>
+
+
+    <style>
+*{
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+        table{
+            border-spacing: 0;
+            margin: 10px;
+            background-color: beige;
+            
+
+        }
+
+        .t-header{
+            background-color: black;
+            color: white;
+        }
+
+        .t-row:nth-child(even){
+            background-color: aliceblue;
+        }
+
+        .t-cell{
+            padding: 10px;
+        }
+    
+
+
+    </style>
+
+
+</head>
+<body>
+
+<center>
+    <h1>Cloud Dashboard</h1>
+
+    <p>Table showing information about all nodes in the cloud.</p>
+
+    <table>
+
+        <tr class="t-header">
+          {% for header in headings %}
+          <th class="t-cell">{{header}}</th>
+          {% endfor %}
+        </tr>
+
+        {% for row in all_nodes %}
+
+        <tr class="t-row">
+            <td class="t-cell">{{row.name}}</td>
+            <td class="t-cell">{{row.id}}</td>
+            <td class="t-cell">{{row.status}}</td>
+
+        </tr>
+
+        {% endfor %}
+
+
+
+    </table>
+
+
+</center>
+    
+</body>
+</html>

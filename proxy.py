@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from resource_manager import Node
 import docker
 
@@ -109,6 +109,16 @@ def cloud_node_ls():
         all_nodes.append({"name":node.name,"id": node.id, "status": node.container_status})
 
     return jsonify({"all_nodes":all_nodes})
+
+@app.route('/cloudproxy/dashboard/')
+def cloud_dashboard():
+    all_nodes = []
+    for node in nodes:
+        all_nodes.append({"name":node.name,"id": node.id, "status": node.container_status})
+
+    headings = ("Name", "ID", "Status")
+
+    return render_template('main.html', all_nodes=all_nodes, headings = headings)
 
 
 if __name__ == '__main__':
