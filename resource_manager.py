@@ -42,8 +42,47 @@ You need to make these factors as configurable parameters in the simple cloud im
             
 
 
+class Cluster:
+    def __init__(self, cluster_name):
+        self.cluster_name = cluster_name
+        self.pods = []
+class Pod:
+    def __init__(self, pod_name):
+        self.pod_name = pod_name
+        self.nodes = []
+
+#creating classes for Node
+class Node:
+    '''
+Each node will have a specific CPU, memory, and storage limit factor.
+You need to make these factors as configurable parameters in the simple cloud implementation so we can configure the type of nodes – thin, medium, large nodes.
+    '''
+
+    def __init__(self, name, job_status=None, container=None,id=None, container_status="Idle", curr_job=None, cpu=None, limit=None, memory=None):
+        self.id = id
+        self.name = name
+        self.container_status = container_status
+        self.job_status = job_status
+        self.logs = []
+        self.curr_job = curr_job
+        self.container = container
+
+
+        # idle
+        #start job
+        # running
+        #as soon as job done reset to idle
+
+
+        # def check_if_ended():
+        #     if self.container.exec_inspect not None:
+        #         self.status = "Job done"
+            
+
+
 cURL = pycurl.Curl()
 proxy_url = 'http://10.140.17.112:6000/'
+
 
 app = Flask(__name__)
 
@@ -144,6 +183,7 @@ def cloud_node_ls():
     #return the nodes array from proxy
     data = BytesIO()
 
+
     cURL.setopt(cURL.URL, proxy_url + '/cloudproxy/nodels/')
     cURL.setopt(cURL.WRITEFUNCTION, data.write)
     cURL.perform()
@@ -153,6 +193,7 @@ def cloud_node_ls():
     result = "success"
     all_nodes = dictionary['all_nodes']
     all_nodes.sort(key=lambda x: int(re.search(r'\d+$', x['name']).group()))  # Sort by trailing digits
+
 
     return jsonify({'result': result, 'all_nodes': all_nodes})
 
