@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, render_template
-
+import threading
 import docker
+import time
 
 client = docker.from_env()
 
@@ -131,6 +132,22 @@ import concurrent.futures
 @app.route('/cloudproxy/init/')
 def cloud_init():
 
+    current_containers = client.containers.list()
+    #if there are more than 50 containers and server was restarted
+    #hence the nodelist would be empty
+
+    if len(current_containers)>=50 and len(nodes)==0:
+        result = [node for node in current_containers]
+
+        for node in result:
+            for i in range(1,51):
+                if node.name == f"node{i}":
+                    nodes.append(Node(name=node.name, container=node, id=node.id))
+
+        return jsonify({'result': "successfully initialized 50 nodes"})
+ 
+
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         future_to_container = {}
         for i in range(50):
@@ -152,7 +169,7 @@ def cloud_init():
     sorted_nodes = sorted(nodes, key=lambda node: node.name)
     
     result = 'successfully initialized idle 50 nodes'
-    node_list = [(node.name, node.id) for node in sorted_nodes]
+    node_list = [(node.name, node.id) for node in sorted_nodes] 
     print(f'Node list: {node_list}')
     return jsonify({'result': result, "node_list": node_list})
 
@@ -205,6 +222,59 @@ def cloud_dashboard():
     headings = ("Name", "ID", "Status")
 
     return render_template('main.html', all_nodes=all_nodes, headings = headings)
+
+
+
+@app.route('/cloudproxy/jobs/launch/')
+def cloud_launch():
+    #while there is an idle node available
+    count = 0
+    for node in nodes:
+        if node.container_status == "Idle":
+            count+=1
+            #make the container run the job
+            command = 'sleep 10'
+            res = client.api.exec_create(node.name, command)
+            # Create a new thread to run the function
+            job_thread = threading.Thread(target=run_job(node, res["Id"]))
+            check_status_thread = threading.Thread(target=check_status(node, res["Id"]))
+
+            # Start the thread
+            job_thread.start()
+            check_status_thread.start()
+
+            break
+    
+    if count==0:
+        result = "no Idle nodes available for running the job"
+    else:
+        result = "job ran successfully"
+    
+    return jsonify({"result":result})
+
+def run_job(node, exec_id):
+    node.container_status = "Running"
+    client.api.exec_start(exec_id)
+
+
+# Define a function to check the status of the exec_create object
+def check_status(node, exec_id):
+    while True:
+        exec_inspect = client.api.exec_inspect(exec_id)
+        if exec_inspect['Running']:
+            while exec_inspect["Running"]:
+                node.job_status = "Running"
+                node.container_status = "Running"
+                exec_inspect = client.api.exec_inspect(exec_id)
+                print("The exec_create object is currently running.")
+                print(node.job_status)
+                time.sleep(1)
+        else:
+            print("The exec_create object has completed.")
+            node.job_status = "Completed"
+            node.container_status = "Idle"
+            print(node.job_status)
+            break
 
 
 

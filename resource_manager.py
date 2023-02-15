@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, render_template
 import pycurl
 import json
 from io import BytesIO
+from operator import itemgetter
 import re
 
 class Cluster:
@@ -81,7 +82,7 @@ You need to make these factors as configurable parameters in the simple cloud im
 
 
 cURL = pycurl.Curl()
-proxy_url = 'http://10.140.17.112:6000/'
+proxy_url = 'http://10.0.0.207:6000/'
 
 
 app = Flask(__name__)
@@ -151,15 +152,20 @@ def cloud_rm_node(name):
 
 
 
-@app.route('/cloud/jobs/launch', methods=['POST'])
+@app.route('/cloud/jobs/launch/', methods=['POST','GET'])
 def cloud_launch():
     if request.method == 'POST':
         print('Client is posting a file')
         job_file = request.files['file']
         print(job_file.read())
         #TODO:logic for invoking RM-Proxy
-        result = 'success'
-        return jsonify ({'result': result})
+    elif request.method == 'GET':
+            cURL.setopt(cURL.URL, proxy_url + '/cloudproxy/jobs/launch/')
+            cURL.perform()
+
+    result = 'job posted to cloud successfully'
+    return jsonify ({'result': result})
+
 
 
 @app.route('/cloud/podls/')
@@ -210,7 +216,7 @@ def cloud_dashboard():
 
     result = "success"
     all_nodes = dictionary['all_nodes']
-    all_nodes.sort(key=lambda x: int(re.search(r'\d+$', x['name']).group()))  # Sort by trailing digits
+    all_nodes = sorted(all_nodes, key=itemgetter('name'))
     headings = ("Name", "ID", "Status")
 
     return render_template('main.html', all_nodes=all_nodes, headings=headings)

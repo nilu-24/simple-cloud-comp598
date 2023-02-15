@@ -40,15 +40,17 @@ def cloud_rm_node(url, command):
 
 
 
-def cloud_launch(url, command):
+def cloud_launch(url, command=None):
     if init_check:
-        command_list = command.split()
-        if len(command_list) == 3:
-            file_path = command_list[2]
-            if os.path.isfile(file_path):
-                files = {'file': open(file_path, 'rb')}
-                ret = requests.post(url + '/cloud/jobs/launch', files=files)
-                print(ret.text)
+        # command_list = command.split()
+        # if len(command_list) == 3:
+        #     file_path = command_list[2]
+        #     if os.path.isfile(file_path):
+        #         files = {'file': open(file_path, 'rb')}
+        #         ret = requests.post(url + '/cloud/jobs/launch', files=files)
+        #         print(ret.text)
+        cURL.setopt(cURL.URL, url + '/cloud/jobs/launch/')
+        cURL.perform()
 
 
 def cloud_pod_ls(url, command):
@@ -83,6 +85,9 @@ def main():
 
         elif command.startswith('cloud node ls'):
             cloud_node_ls(rm_url)
+
+        elif command.startswith('cloud launch'):
+            cloud_launch(rm_url)
 
 if __name__ == '__main__':
     main()
