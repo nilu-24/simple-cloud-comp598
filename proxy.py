@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request, render_template
+
 import docker
 
 client = docker.from_env()
 
 
 app = Flask(__name__)
+
 
 
 nodes = []
@@ -45,7 +47,7 @@ You need to make these factors as configurable parameters in the simple cloud im
         # def check_if_ended():
         #     if self.container.exec_inspect not None:
         #         self.status = "Job done"
-            
+
 
 
 @app.route('/cloudproxy/nodes/<name>')
@@ -177,10 +179,6 @@ def check_or_create_container(container_name):
 
 
 
-
-
-
-
 @app.route('/cloudproxy/nodels/')
 def cloud_node_ls():
     # Create a set of node names to remove duplicates
@@ -195,6 +193,18 @@ def cloud_node_ls():
             all_nodes.append({"name":node.name,"id": node.id, "status": node.container_status})
 
     return jsonify({"all_nodes":all_nodes})
+
+
+
+@app.route('/cloudproxy/dashboard/')
+def cloud_dashboard():
+    all_nodes = []
+    for node in nodes:
+        all_nodes.append({"name":node.name,"id": node.id, "status": node.container_status})
+
+    headings = ("Name", "ID", "Status")
+
+    return render_template('main.html', all_nodes=all_nodes, headings = headings)
 
 
 
