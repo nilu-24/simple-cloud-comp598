@@ -6,7 +6,6 @@ import requests
 cURL = pycurl.Curl()
 
 init_check = False
-
 def cloud_hello(url):
     if init_check:
         cURL.setopt(cURL.URL, url)
@@ -49,8 +48,23 @@ def cloud_launch(url, command=None):
         #         files = {'file': open(file_path, 'rb')}
         #         ret = requests.post(url + '/cloud/jobs/launch', files=files)
         #         print(ret.text)
-        cURL.setopt(cURL.URL, url + '/cloud/jobs/launch/')
+        cURL.setopt(cURL.URL, url + '/cloud/jobs/')
         cURL.perform()
+
+
+def cloud_pod_register(url, command):
+    if init_check:
+        command_list = command.split()
+        if len(command_list) == 4:
+            cURL.setopt(cURL.URL, url + '/cloud/pod_register/'  + command_list[3])
+            cURL.perform()
+
+def cloud_pod_rm(url, command):
+    if init_check:
+        command_list = command.split()
+        if len(command_list) == 4:
+            cURL.setopt(cURL.URL, url + '/cloud/pod_rm/'  + command_list[3])
+            cURL.perform()
 
 
 def cloud_pod_ls(url, command):
@@ -64,6 +78,13 @@ def cloud_node_ls(url):
     if init_check:
         cURL.setopt(cURL.URL, url + '/cloud/nodels/')
         cURL.perform()
+
+def cloud_abort(url, command):
+    if init_check:
+        command_list = command.split()
+        if len(command_list) == 4:
+            cURL.setopt(cURL.URL, url + '/cloud/abort/'  + command_list[3])
+            cURL.perform()
 
 
 def main():
@@ -88,6 +109,19 @@ def main():
 
         elif command.startswith('cloud launch'):
             cloud_launch(rm_url)
+        
+        #commands 
+        elif command.startswith('cloud pod ls'):
+            cloud_pod_ls(rm_url)
+
+        elif command.startswith('cloud pod register'):
+            cloud_pod_register(rm_url, command)
+
+        elif command.startswith('cloud pod rm'):
+            cloud_pod_rm(rm_url, command)
+
+        elif command.startswith('cloud abort'):
+            cloud_abort(rm_url, command)
 
 if __name__ == '__main__':
     main()

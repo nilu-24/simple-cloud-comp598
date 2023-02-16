@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 
 nodes = []
-jobs = [] #queue
+jobs = ['sleep 10', 'sleep 10', 'sleep 10'] #queue
 
 class Cluster:
     def __init__(self, cluster_name):
@@ -229,28 +229,30 @@ def cloud_dashboard():
 def cloud_launch():
     #while there is an idle node available
     count = 0
-    for node in nodes:
-        if node.container_status == "Idle":
-            count+=1
-            #make the container run the job
-            command = 'sleep 10'
-            res = client.api.exec_create(node.name, command)
-            # Create a new thread to run the function
-            job_thread = threading.Thread(target=run_job(node, res["Id"]))
-            check_status_thread = threading.Thread(target=check_status(node, res["Id"]))
+    while True and len(jobs)>0:
+        for job in jobs:
+            for node in nodes:
+                if node.container_status == "Idle":
+                    count+=1
+                    #make the container run the job
+                    #command = 'sleep 10'
+                    res = client.api.exec_create(node.name, job)
+                    # Create a new thread to run the function
+                    job_thread = threading.Thread(target=run_job(node, res["Id"]))
+                    check_status_thread = threading.Thread(target=check_status(node, res["Id"]))
 
-            # Start the thread
-            job_thread.start()
-            check_status_thread.start()
+                    # Start the thread
+                    job_thread.start()
+                    check_status_thread.start()
 
-            break
-    
-    if count==0:
-        result = "no Idle nodes available for running the job"
-    else:
-        result = "job ran successfully"
-    
-    return jsonify({"result":result})
+                    break
+        
+        if count==0:
+            result = "no Idle nodes available for running the job"
+        else:
+            result = "job ran successfully"
+        
+        return jsonify({"result":result})
 
 def run_job(node, exec_id):
     node.container_status = "Running"
@@ -278,6 +280,10 @@ def check_status(node, exec_id):
 
 
 
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=6000)
+    app_thread = threading.Thread(target=cloud_launch)
+    app_thread.run()
+
 

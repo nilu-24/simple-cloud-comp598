@@ -5,52 +5,22 @@ from io import BytesIO
 from operator import itemgetter
 import re
 
-class Cluster:
-    def __init__(self, cluster_name):
-        self.cluster_name = cluster_name
-        self.pods = []
-class Pod:
-    def __init__(self, pod_name):
-        self.pod_name = pod_name
-        self.nodes = []
-
-#creating classes for Node
-class Node:
-    '''
-Each node will have a specific CPU, memory, and storage limit factor.
-You need to make these factors as configurable parameters in the simple cloud implementation so we can configure the type of nodes – thin, medium, large nodes.
-    '''
-
-    def __init__(self, name, job_status=None, container=None,id=None, container_status="Idle", curr_job=None, cpu=None, limit=None, memory=None):
-        self.id = id
-        self.name = name
-        self.container_status = container_status
-        self.job_status = job_status
-        self.logs = []
-        self.curr_job = curr_job
-        self.container = container
-
-
-        # idle
-        #start job
-        # running
-        #as soon as job done reset to idle
-
-
-        # def check_if_ended():
-        #     if self.container.exec_inspect not None:
-        #         self.status = "Job done"
-            
-
+#creating the cluster which is a list of pods
+cluster = []
 
 class Cluster:
     def __init__(self, cluster_name):
         self.cluster_name = cluster_name
         self.pods = []
 class Pod:
-    def __init__(self, pod_name):
+    def __init__(self, pod_name="default", pod_id = "some_id"):
         self.pod_name = pod_name
         self.nodes = []
+        self.number_of_nodes = 0
+        self.pod_id = pod_id
+
+        if pod_name=="default":
+            self.number_of_nodes = 50
 
 #creating classes for Node
 class Node:
@@ -82,7 +52,7 @@ You need to make these factors as configurable parameters in the simple cloud im
 
 
 cURL = pycurl.Curl()
-proxy_url = 'http://10.0.0.207:6000/'
+proxy_url = 'http://10.122.18.226:6000/'
 
 
 app = Flask(__name__)
@@ -167,18 +137,53 @@ def cloud_launch():
     return jsonify ({'result': result})
 
 
-
 @app.route('/cloud/podls/')
 def cloud_pod_ls():
-    print(pods_dict)
-    result = 'success'
-    return jsonify ({'result': result})
+    
+    return jsonify([{"pod_name":pod.pod_name,"pod_id": pod.pod_id, "number_of_nodes": pod.number_of_nodes} for pod in cluster])
+
+
+
+@app.route('/cloud/pod_register/<name>')
+def pod_register(name):
+    result = ""
+    if request.method == 'GET':
+        print("adding pod to main cluster")
+        for pod in cluster:
+            if pod.pod_name == name:
+                result = "pod already exists"
+
+        if result!="pod already exists":
+            new_pod = Pod(pod_name=name)
+            cluster.append(new_pod)
+            result = 'successfully added pod to cluster'
+
+        return jsonify ({'result': result})
+
+
+@app.route('/cloud/pod_rm/<name>')
+def cloud_pod_rm(name):
+
+    if name == "default":
+        return jsonify ({'result': "cannot remove default pod"}) 
+
+    if request.method == 'GET':
+        print("removing pod from main cluster")
+        result = 'cannot remove non-existing pod'
+        for pod in cluster:
+            if pod.pod_name == name:
+                cluster.remove(pod)
+                result = "successfully removed pod from cluster"
+
+        return jsonify ({'result': result})
+
 
 @app.route('/cloud/init/')
 def cloud_init():
     cURL.setopt(cURL.URL, proxy_url + '/cloudproxy/init/')
     cURL.perform()
     result = 'success'
+    cluster.append(Pod())
     return jsonify ({'result': result})
 
 all_nodes = []
@@ -198,8 +203,6 @@ def cloud_node_ls():
 
     result = "success"
     all_nodes = dictionary['all_nodes']
-    all_nodes.sort(key=lambda x: int(re.search(r'\d+$', x['name']).group()))  # Sort by trailing digits
-
 
     return jsonify({'result': result, 'all_nodes': all_nodes})
 
@@ -223,6 +226,9 @@ def cloud_dashboard():
 
 
 
+@app.route('/could/abort/<jobid>')
+def cloud_abort(jobid):
+    pass
         
 
 
